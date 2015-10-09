@@ -2,10 +2,14 @@
 # -*- coding: utf-8 -*-
 """Simulator Module"""
 import urllib2
-import time
+import csv
 import argparse
+import random
 
-class Queue():
+class Queue(object):
+    """Docstring
+    Attributes = None
+    """
 
     def __init__(self):
         self.items = []
@@ -23,10 +27,12 @@ class Queue():
         return len(self.items)
 
 
-class Server(): #server process requests 
+class Server(object):
+    """Docstring
+    Attributes: None
+    """
 
-    def __init__(self, ppm):
-        self.page_rate = ppm
+    def __init__(self):
         self.current_task = None
         self.time_remaining = 0
 
@@ -44,37 +50,105 @@ class Server(): #server process requests
 
     def start_next(self, new_task):
         self.current_task = new_task
-        self.time_remaining = new_task.get_pages() * 60 / self.page_rate
+        self.time_remaining = new_task.proccs_time()
 
 
-class Request(): #user requesting file from webserver
+class Request(object):
+    """
+    Attributes: None
+    """
 
-    def __init__(self, time):
+    def __init__(self, time, time_req):
         self.timestamp = time
-        self.pages = random.randrange(1, 21)
+        self.time_req = time_req
 
-    def get_stamp(self):
-        return self.timestamp
-
-    def get_pages(self):
-        return self.pages
+    def proccs_time(self):
+        return self.time_req
 
     def wait_time(self, current_time):
         return current_time - self.timestamp
-    
-def simulate_one_server(filename):
-    pass #simulate one server, return average. 
-    
-    
 
-def simulate_many_server(filename):
-    pass #simulate many servers, return average.
 
-def main(file):
-    url = file
-    response = urllib2.urlopen(url)
-    
+def simulate_one_server(num_seconds, time_required):
+    """
+    Args:
+        >>>
+    Returns:
+        >>>
+    Examples:
+        >>>
+    """
+    host_server = Server()
+    request_queue = Queue()
+    waiting_times = []
+    request_link = Request(num_seconds, time_required)
+    request_queue.enqueue(request_link)
 
+    for current_second in range(num_seconds):
+
+        if (not host_server.busy()) and (not request_queue.is_empty()):
+            next_task = request_queue.dequeue()
+            waiting_times.append(next_task.wait_time(current_second))
+            host_server.start_next(next_task)
+
+        host_server.tick()
+
+    average_wait = sum(waiting_times) / len(waiting_times)
+    print "Average Wait %6.2f secs %3d tasks remaining." % \
+    (average_wait, request_queue.size())
+
+
+def simulate_many_servers(request_file, servers):
+    """
+    Args:
+        >>>
+    Returns:
+        >>>
+    Examples:
+        >>>
+    """
+    servers_list = [n for n in range(0, int(servers))]
+    server_room = {}
+    for computer in servers_list:
+        server_room[computer] = simulate_one_server
+    for data in request_file:
+        for serv_num in servers_list:
+            server_num = random.choice(servers_list)
+            server_room[server_num](int(data[0]), int(data[2]))
+
+
+def main():
+    """
+    Args:
+        >>>
+    Returns:
+        >>>
+    Examples:
+        >>>
+    """
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-u', '--file', help='Enter URL Link to CSV File')
+    parser.add_argument('-c', '--servers', help ='Enter number of Servers')
+
+    args = parser.parse_args()
+
+    try:
+        if args.file:
+            grab_file = urllib2.urlopen(args.file)
+            read_file = csv.reader(grab_file)
+            for row in read_file:
+                simulate_one_server(int(row[0]), int(row[2]))
+        elif args.servers:
+            grab_file = urllib2.urlopen('http://s3.amazonaws.com/cuny-is211-spring2015/requests.csv')
+            read_file = csv.reader(grab_file)
+            simulate_many_servers(read_file, args.servers)
+        else:
+            print 'Invalid attempt, not a server, not a url'
+
+    except urllib2.URLError as url_err:
+        print 'The URL you\'ve submitted is INVALID, enter VALID URL'
+        raise url_err
 
 if __name__ == '__main__':
-    main('http://s3.amazonaws.com/cuny-is211-spring2015/requests.csv')
+    main()
