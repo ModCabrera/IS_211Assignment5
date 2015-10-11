@@ -5,6 +5,7 @@ import urllib2
 import csv
 import argparse
 import random
+import datetime
 
 class Queue(object):
     """Docstring
@@ -113,6 +114,7 @@ def simulate_many_servers(request_file, servers):
         server_room[computer] = simulate_one_server
     for data in request_file:
         for serv_num in servers_list:
+            random.seed(datetime.datetime.now())
             server_num = random.choice(servers_list)
             server_room[server_num](int(data[0]), int(data[2]))
 
