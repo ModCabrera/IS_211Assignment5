@@ -8,7 +8,8 @@ import random
 import datetime
 
 class Queue(object):
-    """Docstring
+    """Queue
+
     Attributes = None
     """
 
@@ -55,7 +56,8 @@ class Server(object):
 
 
 class Request(object):
-    """
+    """Request
+
     Attributes: None
     """
 
@@ -73,10 +75,14 @@ class Request(object):
 def simulate_one_server(num_seconds, time_required):
     """
     Args:
-        >>>
+        host_server (inst): Instance of the server class.
+        request_queue (inst): Instance of the Queue class.
+        waiting_time (list): List hold waiting time.
+        request_link (inst): Instance of Request class.
     Returns:
-        >>>
+        None
     Examples:
+        >>> simulate_one_server(9, 2)
         >>>
     """
     host_server = Server()
@@ -102,10 +108,14 @@ def simulate_one_server(num_seconds, time_required):
 def simulate_many_servers(request_file, servers):
     """
     Args:
-        >>>
+        servers_list (list): List of servers to query.
+        server_room (dict): Instances of Servers to query.
+
     Returns:
-        >>>
+        None
+
     Examples:
+        >>> simulate_many_servers(file, 4)
         >>>
     """
     servers_list = [n for n in range(0, int(servers))]
@@ -122,16 +132,19 @@ def simulate_many_servers(request_file, servers):
 def main():
     """
     Args:
-        >>>
+        parsers (inst): Parser class intance for terminal input.
+
     Returns:
-        >>>
+        None
+
     Examples:
-        >>>
+        >>> main()
+        >>> The URL you've submitted is INVALID, enter VALID URL.
     """
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-u', '--file', help='Enter URL Link to CSV File')
-    parser.add_argument('-c', '--servers', help ='Enter number of Servers')
+    parser.add_argument('-c', '--servers', help='Enter number of Servers')
 
     args = parser.parse_args()
 
